@@ -5,10 +5,13 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "cachelab.h"
 
 #define FILENAMELEN 40
 #define TRACESIZE 30
+
+#define check(s,c) (s[1]==c)
 
 typedef struct{
 	int is_valid;
@@ -43,7 +46,9 @@ int main(int argc, char** argv)
 	FILE* fd = NULL;
 	char* trace_line = NULL;
 	size_t line_size, len = 0;
-
+	char* token = NULL;
+	unsigned long int address;
+	int bytes;
 	while((retval = getopt(argc, argv, "s:E:b:t:"))!= -1){
 		switch(retval){
 			case 's':
@@ -62,7 +67,7 @@ int main(int argc, char** argv)
 	}
 #ifdef debug
 	printf("s=%d\tE=%d\tb=%d\ttrace_file=%s\n",num_sets,num_lines,num_blocks,\
-		trace_file);
+			trace_file);
 #endif
 
 	cache = calloc( power(2, num_sets)*num_lines, sizeof(line));
@@ -78,9 +83,39 @@ int main(int argc, char** argv)
 
 	while((line_size = getline(&trace_line, &len, fd)) != -1)
 	{
+#ifdef debug
 		printf("Line: %s\n",trace_line);
+#endif
+		if(check(trace_line,'M'))
+			continue;
+		token = strtok(trace_line," ");
+
+		switch(*token){
+			case 'L':
+				address = atol(strtok(NULL,","));
+				bytes = atoi(strtok(NULL,","));
+#ifdef debug
+				printf("L:Address:%lu\tbytes:%d\n",address,bytes);
+#endif
+				break;
+			case 'S':
+				address = atol(strtok(NULL,","));
+				bytes = atoi(strtok(NULL,","));
+#ifdef debug
+				printf("S:Address:%lu\tbytes:%d\n",address,bytes);
+#endif
+				break;
+			case 'M':
+				address = atol(strtok(NULL,","));
+				bytes = atoi(strtok(NULL,","));
+#ifdef debug
+				printf("M:Address:%lu\tbytes:%d\n",address,bytes);
+#endif
+				break;
+		}
 	}
 
 	printSummary(hits, misses, evictions);
+	free(cache);
 	return 0;
 }
