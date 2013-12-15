@@ -11,7 +11,7 @@
 #define FILENAMELEN 40
 #define TRACESIZE 30
 
-#define check(s,c) (s[1]==c)
+#define check(s,c) (s[0]==c)
 
 typedef struct{
 	int is_valid;
@@ -86,7 +86,7 @@ int main(int argc, char** argv)
 #ifdef debug
 		printf("Line: %s\n",trace_line);
 #endif
-		if(check(trace_line,'M'))
+		if(check(trace_line,'I'))
 			continue;
 		token = strtok(trace_line," ");
 
